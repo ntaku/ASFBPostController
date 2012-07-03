@@ -1,0 +1,9 @@
+
+/* Facebook */
+"FACEBOOK" = "Facebook";
+"FB_POST" = "Post";
+"FB_CANCEL" = "Cancel";
+"FB_NEED_LOGIN" = "Not logged in";
+"FB_ERROR" = "Error has occured. Please login again.";
+"FB_NO_PERMISSION" = "You have to permit to post your timeline. Please login again to fix it.";
+"FB_NO_PERMISSION2" = "Post failed. Please check whether post to timeline is permitted. You can add that by re-login.";

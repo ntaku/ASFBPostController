@@ -1,0 +1,30 @@
+//
+//  Copyright (c) 2012 AppStair LLC. All rights reserved.
+//  http://appstair.com
+//
+
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+
+
+// Shortcut
+
+#define LOG(...)        NSLog(__VA_ARGS__)
+#define UIAppDelegate   (AppDelegate *)[[UIApplication sharedApplication] delegate]
+#define IPAD            (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+#define LS(name)        NSLocalizedString(name, @"")
+#define RELEASE(x)      [_ ## x release], _ ## x = nil
+
+
+// Facebook
+
+#define FB_APP_ID                           @"1234567"
+#define FB_PERMISSIONS                      @"publish_stream"
+
+
+// UserDefault for Facebook
+
+#define FB_ACCESS_TOKEN                     @"FBAccessTokenKey"
+#define FB_EXPIRATION_DATE                  @"FBExpirationDateKey"
+#define FB_LOGINNAME                        @"FBLoginName"
+
