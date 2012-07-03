@@ -1,3 +1,6 @@
+![Screenshot1](https://dl.dropbox.com/u/339699/github/ASFBPostController.png)
+
+
 ASFBPostController
 ==================
 
@@ -16,13 +19,10 @@ Setup
 2. Replace sample ID with your Facebook App ID.
 
 * ASFBPost-Prefix.pch
-#define FB_APP_ID @"1234567"
+
+FB_APP_ID @"1234567"
 
 * ASFBPost-Infor.plist
+
 URL types > Item 0 > URL Schemes > Item 0 > fb1234567
 
-
-Screens
-==================
-![Screenshot1](https://dl.dropbox.com/u/339699/github/ASFBPostController_iphone.png)
-![Screenshot1](https://dl.dropbox.com/u/339699/github/ASFBPostController_ipad.png)
