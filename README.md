@@ -12,11 +12,11 @@ ASFBPostController provides photo posting function to Facebook. You can easily i
 
 * ASFBPost-Prefix.pch
 
-FB_APP_ID @"1234567"
+	#define FB_APP_ID @"1234567"
 
 * ASFBPost-Infor.plist
 
-URL types > Item 0 > URL Schemes > Item 0 > fb1234567
+	URL types > Item 0 > URL Schemes > Item 0 > fb1234567
 
 # Usage
 
