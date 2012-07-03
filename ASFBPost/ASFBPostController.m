@@ -147,10 +147,10 @@
         UIButton *_btn = [UIButton buttonWithType:UIButtonTypeCustom];
         UIImage *image;
         
-        if(self.loginName){
+        if([self.facebook isSessionValid]){
             image = [UIImage imageNamed:@"FBConnect.bundle/images/LogoutNormal.png"];
             [_btn addTarget:self action:@selector(fbLogout) forControlEvents:UIControlEventTouchUpInside];
-            cell.textLabel.text = self.loginName;            
+            cell.textLabel.text = self.loginName;
         }else{
             image = [UIImage imageNamed:@"FBConnect.bundle/images/LoginNormal.png"];        
             [_btn addTarget:self action:@selector(fbLogin) forControlEvents:UIControlEventTouchUpInside];
@@ -221,33 +221,34 @@
     }
     Facebook *fb = [[Facebook alloc] initWithAppId:FB_APP_ID andDelegate:self];
     self.facebook = fb;
+    [UIAppDelegate setFacebook:self.facebook];
     [fb release];
-    
+
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    if([defaults objectForKey:FB_ACCESS_TOKEN] && [defaults objectForKey:FB_EXPIRATION_DATE]){
-        self.facebook.accessToken = [defaults objectForKey:FB_ACCESS_TOKEN];
-        self.facebook.expirationDate = [defaults objectForKey:FB_EXPIRATION_DATE];
+    NSString *token = [defaults objectForKey:FB_ACCESS_TOKEN];
+    NSDate *expire = [defaults objectForKey:FB_EXPIRATION_DATE];
+    NSString *name = [defaults objectForKey:FB_LOGINNAME];
+    
+    if(token && expire && name){
+        self.facebook.accessToken = token;
+        self.facebook.expirationDate = expire;
+        self.loginName = name;
     }
-    if([defaults objectForKey:FB_LOGINNAME]){
-        self.loginName = [defaults objectForKey:FB_LOGINNAME];
+    if (![self.facebook isSessionValid]) {
+        [self clearFbSession];
     }
 }
 
 - (void)fbLogin{
-    if(!self.facebook){
-        [self createFbInstance];
-    }
-    if([self.facebook isSessionValid]){
-        LOG(@"facebook: valid session");
-    }
+    [self createFbInstance];
+    
     NSArray *permissions = [[NSArray alloc] initWithObjects:FB_PERMISSIONS, nil];
-    [UIAppDelegate setFacebook:self.facebook];
     [self.facebook authorize:permissions];
     [permissions release];
 }
 
 - (void)fbLogout{
-    [self createFbInstance];
+    [self loading:YES];
     [self.facebook logout];
     RELEASE(facebook);
 }
@@ -266,7 +267,6 @@
 - (void)fbDidLogin {
     LOG(@"facebook: did login");
     [self saveFbSession:self.facebook.accessToken expiresAt:self.facebook.expirationDate];
-
     [self.facebook requestWithGraphPath:@"me" andDelegate:self];
     [self.facebook requestWithGraphPath:@"me/permissions" andDelegate:self];
 }
@@ -278,6 +278,7 @@
 
 - (void)fbDidLogout{
     LOG(@"facebook: did logout");
+    [self loading:NO];
     [self clearFbSession];
     [self.tableView reloadData];
 }
@@ -292,6 +293,7 @@
 }
 
 - (void)saveFbSession:(NSString*)accessToken expiresAt:(NSDate*)expiresAt{
+    LOG(@"facebook: save session");
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if(accessToken && expiresAt){
         [defaults setObject:accessToken forKey:FB_ACCESS_TOKEN];
@@ -301,14 +303,12 @@
 }
 
 - (void)clearFbSession{
+    LOG(@"facebook: clear session");
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    if ([defaults objectForKey:FB_ACCESS_TOKEN]) {
-        [defaults removeObjectForKey:FB_ACCESS_TOKEN];
-        [defaults removeObjectForKey:FB_EXPIRATION_DATE];
-        [defaults removeObjectForKey:FB_LOGINNAME];
-        [defaults synchronize];
-    }
-    RELEASE(facebook);
+    [defaults removeObjectForKey:FB_ACCESS_TOKEN];
+    [defaults removeObjectForKey:FB_EXPIRATION_DATE];
+    [defaults removeObjectForKey:FB_LOGINNAME];
+    [defaults synchronize];
     self.loginName = nil;
 }
 

@@ -39,13 +39,16 @@
     return YES;
 }
 
-// for after iOS 4.2
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    if(self.facebook){
-        return [self.facebook handleOpenURL:url];
-    }
-    return YES;
+// Pre iOS 4.2 support
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+    return [self.facebook handleOpenURL:url]; 
 }
+
+// For iOS 4.2+ support
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+    return [self.facebook handleOpenURL:url];
+}
+
 
 - (void)applicationWillResignActive:(UIApplication *)application{}
 

@@ -18,7 +18,7 @@
 
 // Facebook
 
-#define FB_APP_ID                           @"1234567"
+#define FB_APP_ID                           @"118794958250378"
 #define FB_PERMISSIONS                      @"publish_stream"
 
 
