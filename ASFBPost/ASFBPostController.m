@@ -3,6 +3,14 @@
 //  http://appstair.com
 //
 
+// Facebook
+#define FB_APP_ID             @"1234567"
+
+// UserDefault for Facebook
+#define FB_ACCESS_TOKEN       @"FBAccessTokenKey"
+#define FB_EXPIRATION_DATE    @"FBExpirationDateKey"
+#define FB_LOGINNAME          @"FBLoginName"
+
 #import "ASFBPostController.h"
 #import "FBConnect.h"
 #import "AppDelegate.h"
@@ -18,6 +26,7 @@
 - (void)createFbInstance;
 - (void)setViewStyle;
 - (void)loading:(BOOL)isLoading;
+- (BOOL)isIpad;
 
 @end
 
@@ -39,12 +48,12 @@
 - (void)dealloc{
     [UIAppDelegate setFacebook:nil];
     
-    RELEASE(facebook);
-    RELEASE(loginName);
-    RELEASE(textView);
-    RELEASE(loadingAlert);
-    RELEASE(thumbnailImage);
-    RELEASE(originalImage);
+    [_facebook release], _facebook = nil;
+    [_loginName release], _loginName = nil;
+    [_textView release], _textView = nil;
+    [_loadingAlert release], _loadingAlert = nil;
+    [_thumbnailImage release], _thumbnailImage = nil;
+    [_originalImage release], _originalImage = nil;
     [super dealloc];
 }
 
@@ -72,7 +81,7 @@
     // navi buttons
     UIBarButtonItem *btn;    
     btn = [[UIBarButtonItem alloc]
-           initWithTitle:LS(@"FB_POST")
+           initWithTitle:NSLocalizedString(@"FB_POST", @"")
            style:UIBarButtonItemStyleBordered
            target:self
            action:@selector(actionSave)];
@@ -80,7 +89,7 @@
     [btn release];
     
     btn = [[UIBarButtonItem alloc]
-           initWithTitle:LS(@"FB_CANCEL")
+           initWithTitle:NSLocalizedString(@"FB_CANCEL", @"")
            style:UIBarButtonItemStyleBordered
            target:self 
            action:@selector(actionCancel)];
@@ -105,7 +114,7 @@
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation{
-    if(IPAD){
+    if([self isIpad]){
         return YES;
     }
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
@@ -130,7 +139,7 @@
     if(indexPath.row == 0){
         return 45;
     }
-    return IPAD ? 120 : 80;
+    return [self isIpad] ? 120 : 80;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -154,7 +163,7 @@
         }else{
             image = [UIImage imageNamed:@"FBConnect.bundle/images/LoginNormal.png"];        
             [_btn addTarget:self action:@selector(fbLogin) forControlEvents:UIControlEventTouchUpInside];
-            cell.textLabel.text = LS(@"FB_NEED_LOGIN");
+            cell.textLabel.text = NSLocalizedString(@"FB_NEED_LOGIN", @"");
         }
         
         [_btn setBackgroundImage:image forState:UIControlStateNormal];
@@ -163,8 +172,8 @@
 
     // message
     }else{
-        CGFloat thumbSize = IPAD ? 100 : 60;
-        CGFloat textSzie = IPAD ? 348 : 210;
+        CGFloat thumbSize = [self isIpad] ? 100 : 60;
+        CGFloat textSzie = [self isIpad] ? 348 : 210;
         
         UIImageView *_back = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, thumbSize, thumbSize)];
         _back.image = self.thumbnailImage;
@@ -242,7 +251,7 @@
 - (void)fbLogin{
     [self createFbInstance];
     
-    NSArray *permissions = [[NSArray alloc] initWithObjects:FB_PERMISSIONS, nil];
+    NSArray *permissions = [[NSArray alloc] initWithObjects:@"publish_stream", nil];
     [self.facebook authorize:permissions];
     [permissions release];
 }
@@ -250,7 +259,7 @@
 - (void)fbLogout{
     [self loading:YES];
     [self.facebook logout];
-    RELEASE(facebook);
+    [_facebook release], _facebook = nil;
 }
 
 
@@ -265,19 +274,19 @@
 // http://developers.facebook.com/tools/explorer/?method=GET&path=me%2Fpermissions
 
 - (void)fbDidLogin {
-    LOG(@"facebook: did login");
+    NSLog(@"facebook: did login");
     [self saveFbSession:self.facebook.accessToken expiresAt:self.facebook.expirationDate];
     [self.facebook requestWithGraphPath:@"me" andDelegate:self];
     [self.facebook requestWithGraphPath:@"me/permissions" andDelegate:self];
 }
 
 - (void)fbDidExtendToken:(NSString*)accessToken expiresAt:(NSDate*)expiresAt{
-    LOG(@"facebook: token extended");
+    NSLog(@"facebook: token extended");
     [self saveFbSession:accessToken expiresAt:expiresAt];
 }
 
 - (void)fbDidLogout{
-    LOG(@"facebook: did logout");
+    NSLog(@"facebook: did logout");
     [self loading:NO];
     [self clearFbSession];
     [self.tableView reloadData];
@@ -293,7 +302,7 @@
 }
 
 - (void)saveFbSession:(NSString*)accessToken expiresAt:(NSDate*)expiresAt{
-    LOG(@"facebook: save session");
+    NSLog(@"facebook: save session");
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if(accessToken && expiresAt){
         [defaults setObject:accessToken forKey:FB_ACCESS_TOKEN];
@@ -303,7 +312,7 @@
 }
 
 - (void)clearFbSession{
-    LOG(@"facebook: clear session");
+    NSLog(@"facebook: clear session");
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults removeObjectForKey:FB_ACCESS_TOKEN];
     [defaults removeObjectForKey:FB_EXPIRATION_DATE];
@@ -326,12 +335,12 @@
 }
 
 - (void)request:(FBRequest *)request didFailWithError:(NSError *)error{
-    LOG(@"%@", [error description]);
+    NSLog(@"%@", [error description]);
     [self loading:NO];
     
     UIAlertView *alert = [[UIAlertView alloc] 
                           initWithTitle:@""
-                          message:LS(@"FB_ERROR")
+                          message:NSLocalizedString(@"FB_ERROR", @"")
                           delegate:self
                           cancelButtonTitle:nil
                           otherButtonTitles:@"OK", nil];
@@ -340,7 +349,7 @@
 }
 
 - (void)request:(FBRequest *)request didLoad:(id)result{
-    LOG(@"%@ : %@", request.url, [result description]);
+    NSLog(@"%@ : %@", request.url, [result description]);
     [self loading:NO];
     
     if(!result){
@@ -355,7 +364,7 @@
             if(!isPermitted){
                 UIAlertView *alert = [[UIAlertView alloc] 
                                       initWithTitle:@""
-                                      message:LS(@"FB_NO_PERMISSION")
+                                      message:NSLocalizedString(@"FB_NO_PERMISSION", @"")
                                       delegate:self
                                       cancelButtonTitle:nil
                                       otherButtonTitles:@"OK", nil];
@@ -382,7 +391,7 @@
         }else{
             UIAlertView *alert = [[UIAlertView alloc] 
                                   initWithTitle:@""
-                                  message:LS(@"FB_NO_PERMISSION2")
+                                  message:NSLocalizedString(@"FB_NO_PERMISSION2", @"")
                                   delegate:self
                                   cancelButtonTitle:nil
                                   otherButtonTitles:@"OK", nil];
@@ -426,8 +435,12 @@
     }else{
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         [self.loadingAlert dismissWithClickedButtonIndex:0 animated:NO];
-        RELEASE(loadingAlert);
+        [_loadingAlert release], _loadingAlert = nil;
     }
+}
+
+- (BOOL)isIpad{
+    return (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
 }
 
 @end

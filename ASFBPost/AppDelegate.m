@@ -21,8 +21,8 @@
 
 - (void)dealloc{
     _facebook = nil;
-    RELEASE(mainCtrl);
-    RELEASE(window);
+    [_mainCtrl release], _mainCtrl = nil;
+    [_window release], _window = nil;
     [super dealloc];
 }
 
