@@ -11,7 +11,7 @@ You can easily integrate Facebook post function to you iOS app.
 1. Create your iOS facebook App (http://developers.facebook.com/).
 2. Replace sample ID (1234567) with your Facebook App ID.
 
-* ASFBPost-Prefix.pch
+* ASFBPostController.m
 
 	FB_APP_ID @"1234567"
 
